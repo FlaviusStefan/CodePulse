@@ -19,6 +19,8 @@ namespace CodePulse.API.Controllers
             this.blogPostRepository = blogPostRepository;
             this.categoryRepository = categoryRepository;
         }
+
+
         // POST: {apibaseurl}/api/blogposts
         [HttpPost]
         public async Task<IActionResult> CreateBlogPost([FromBody] CreateBlogPostRequestDto request)
@@ -71,6 +73,8 @@ namespace CodePulse.API.Controllers
             return Ok(response);
         }
 
+
+
         // GET: {apibaseurl}/api/blogposts
         [HttpGet]
         public async Task<IActionResult> GetAllBlogPosts()
@@ -104,6 +108,8 @@ namespace CodePulse.API.Controllers
             return Ok(response);
 
         }
+
+
 
         // GET: {apiBaseUrl}/api/blogposts/{id}
         [HttpGet]
@@ -140,6 +146,8 @@ namespace CodePulse.API.Controllers
 
             return Ok(response);
         }
+
+
 
         // PUT: {apiBaseUrl}/api/blogposts/{id}
         [HttpPut]
@@ -201,5 +209,38 @@ namespace CodePulse.API.Controllers
             return Ok(response);
 
         }
+
+
+
+        // DELETE: {apiBaseUrl}/api/blogposts/{id}
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> DeleteBlogPost([FromRoute] Guid id)
+        {
+            var deletedBlogPost = await blogPostRepository.DeleteAsync(id);
+
+            if (deletedBlogPost == null)
+            {
+                return NotFound();
+            }
+
+            // Convert Domain Model to DTO
+
+            var response = new BlogPostDto
+            {
+                Id = deletedBlogPost.Id,
+                Author = deletedBlogPost.Author,
+                Content = deletedBlogPost.Content,
+                FeaturedImageUrl = deletedBlogPost.FeaturedImageUrl,
+                IsVisible = deletedBlogPost.IsVisible,
+                PublishedDate = deletedBlogPost.PublishedDate,
+                ShortDescription = deletedBlogPost.ShortDescription,
+                Title = deletedBlogPost.Title,
+                UrlHandle = deletedBlogPost.UrlHandle,
+            };
+
+            return Ok(response);
+        }
+
     }
 }
