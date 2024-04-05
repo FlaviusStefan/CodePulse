@@ -19,7 +19,7 @@ namespace CodePulse.API.Controllers
         // POST: {apibaseurl}/api/auth/register
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody]RegisterRequestDto request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
             // Create IdentityUser object
             var user = new IdentityUser
@@ -31,12 +31,12 @@ namespace CodePulse.API.Controllers
             // Create User 
             var identityResult = await userManager.CreateAsync(user, request.Password);
 
-            if(identityResult.Succeeded)
+            if (identityResult.Succeeded)
             {
                 // Add Role to user (Reader Role)
                 identityResult = await userManager.AddToRoleAsync(user, "Reader");
 
-                if(identityResult.Succeeded)
+                if (identityResult.Succeeded)
                 {
                     return Ok();
                 }
@@ -50,11 +50,12 @@ namespace CodePulse.API.Controllers
                         }
                     }
                 }
-            } 
-            else {
-                if(identityResult.Errors.Any()) 
+            }
+            else
+            {
+                if (identityResult.Errors.Any())
                 {
-                    foreach(var error in identityResult.Errors)
+                    foreach (var error in identityResult.Errors)
                     {
                         ModelState.AddModelError("", error.Description);
                     }
@@ -63,6 +64,38 @@ namespace CodePulse.API.Controllers
 
             return ValidationProblem(ModelState);
 
+        }
+
+        // POST: {apibaseurl}/api/auth/login
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            // Check Email
+            var identityUser = await userManager.FindByEmailAsync(request.Email);
+
+            if (identityUser is not null)
+            {
+                // Check Password
+                var checkPasswordResult = await userManager.CheckPasswordAsync(identityUser, request.Password);
+
+                if (checkPasswordResult)
+                {
+                    var roles = await userManager.GetRolesAsync(identityUser);
+                    // Create a Token & Response
+                    var response = new LoginResponseDto()
+                    {
+                        Email = request.Email,
+                        Roles = roles.ToList(),
+                        Token = "TOKEN"
+                    };
+                    
+                    return Ok(response);
+                }
+            }
+            ModelState.AddModelError("", "Email or Password Incorrect");
+
+            return ValidationProblem(ModelState);
         }
     }
 }
