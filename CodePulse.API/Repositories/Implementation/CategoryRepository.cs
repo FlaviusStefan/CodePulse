@@ -100,5 +100,10 @@ namespace CodePulse.API.Repositories.Implementation
 
             return null;
         }
+
+        public async Task<int> GetCount()
+        {
+            return await dbContext.Categories.CountAsync();
+        }
     }
 }
